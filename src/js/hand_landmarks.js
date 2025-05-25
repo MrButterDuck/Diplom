@@ -1,5 +1,6 @@
 import { detectGesture } from './gestures.js';
-import { updateOrientationBuffer, updateGestureBuffer } from './buffers.js';
+import { updateOrientationBuffer, updateGestureBuffer, updateHandPositionBuffer, updateFingerTipBuffer } from './buffers.js';
+import { init3D, update3DState, resize3D } from './object3d.js';
 
 const video = document.querySelector('video');
 const canvas = document.querySelector('canvas');
@@ -23,7 +24,7 @@ function drawHandLandmarks(keypoints) {
   for (let point of keypoints) {
     context.fillStyle = 'blue';
     context.beginPath();
-    context.arc(point.x - landmark_drift , point.y - landmark_drift, 10, 0, 2 * Math.PI);
+    context.arc(point.x - landmark_drift, point.y - landmark_drift, 10, 0, 2 * Math.PI);
     context.fill();
   }
 
@@ -42,12 +43,22 @@ function drawHandLandmarks(keypoints) {
     const p2 = keypoints[end];
     if (p1 && p2) {
       context.beginPath();
-      context.moveTo(p1.x -landmark_drift, p1.y - landmark_drift);
+      context.moveTo(p1.x - landmark_drift, p1.y - landmark_drift);
       context.lineTo(p2.x - landmark_drift, p2.y - landmark_drift);
       context.stroke();
     }
   }
 }
+
+const threeCanvas = document.createElement('canvas');
+threeCanvas.style.position = 'absolute';
+threeCanvas.style.top = '0';
+threeCanvas.style.left = '0';
+threeCanvas.style.pointerEvents = 'none';
+document.body.appendChild(threeCanvas);
+
+init3D(threeCanvas);
+window.addEventListener('resize', resize3D);
 
 navigator.mediaDevices.getUserMedia({
   video: {
@@ -69,6 +80,9 @@ navigator.mediaDevices.getUserMedia({
         const { gesture, angles, avgTipDistance, thumbIndexAngle, orientation } = detectGesture(keypoints);
         const smoothedGesture = updateGestureBuffer(gesture); 
         const smoothOrientation = updateOrientationBuffer(orientation);
+        const wrist = hands[0].keypoints3D[8];
+        const smoothHandPos = updateHandPositionBuffer({ x: wrist.x, y: wrist.y, z: wrist.z });
+        updateFingerTipBuffer(keypoints[8], keypoints[4]);
         
         let text = `Gesture: ${smoothedGesture}`;
         if (angles) {
@@ -78,11 +92,12 @@ navigator.mediaDevices.getUserMedia({
             text += ` | ring: ${angles.ring.toFixed(0)}°`;
             text += ` | pinky: ${angles.pinky.toFixed(0)}°`;
             text += ` \npalmDist: ${avgTipDistance.toFixed(0)}°`;
-            text += ` | tumbIndex: ${thumbIndexAngle.toFixed(0)}°`;
+            text += ` | thumbIndex: ${thumbIndexAngle.toFixed(0)}°`;
         }
         if (smoothOrientation) {
             text += `\nRoll: ${smoothOrientation.roll.toFixed(0)}°, Pitch: ${smoothOrientation.pitch.toFixed(0)}°`;
         }
+        text += `\nHand Pos → x: ${smoothHandPos.x.toFixed(3)}, y: ${smoothHandPos.y.toFixed(3)}, z: ${smoothHandPos.z.toFixed(3)}`;
 
         label.innerText = text;
       } else {
@@ -90,6 +105,7 @@ navigator.mediaDevices.getUserMedia({
         gestureBuffer.length = 0; 
         label.textContent = 'Gesture: none';
       }
+      update3DState();
     }, 50);
   });
 }).catch(console.error);
