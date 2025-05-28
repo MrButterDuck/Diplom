@@ -106,10 +106,10 @@ export function detectGesture(keypoints) {
 
   const isGrab =
     angles.thumb > 160 &&
-    angles.index > 130 && angles.index < 170 &&
-    !extended.middle &&
-    !extended.ring < 110 &&
-    !extended.pinky < 110;
+    angles.index > 130 &&
+    angles.middle < 110 &&
+    angles.ring < 110 &&
+    angles.pinky < 110;
     thumbIndexAngle < 40;
 
   if (countExtended === 5 && thumbIndexAngle > 15) {
@@ -120,6 +120,8 @@ export function detectGesture(keypoints) {
     gesture = 'grab';
   } else if (extended.index && !extended.middle && !extended.ring && !extended.pinky) {
     gesture = 'point';
+  } else if (extended.index && extended.middle && !extended.ring && !extended.pinky) {
+    gesture = 'vi';
   }
 
    const orientation = getPalmOrientation(keypoints);

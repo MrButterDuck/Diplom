@@ -1,6 +1,7 @@
 import { detectGesture } from './gestures.js';
 import { updateOrientationBuffer, updateGestureBuffer, updateHandPositionBuffer, updateFingerTipBuffer } from './buffers.js';
 import { init3D, update3DState, resize3D } from './object3d.js';
+import { settings } from "./settings.js"
 
 const video = document.querySelector('video');
 const canvas = document.querySelector('canvas');
@@ -13,7 +14,7 @@ const model = handPoseDetection.SupportedModels.MediaPipeHands;
 const detectorConfig = {
   runtime: 'mediapipe',
   solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
-  modelType: 'lite',
+  modelType: 'full',
 };
 
 const detector = await handPoseDetection.createDetector(model, detectorConfig);
@@ -85,7 +86,7 @@ navigator.mediaDevices.getUserMedia({
         updateFingerTipBuffer(keypoints[8], keypoints[4]);
         
         let text = `Gesture: ${smoothedGesture}`;
-        if (angles) {
+        if (settings.moreGestureInfo) {
             text += ` | thumb: ${angles.thumb.toFixed(0)}°`;
             text += ` | index: ${angles.index.toFixed(0)}°`;
             text += ` | middle: ${angles.middle.toFixed(0)}°`;
@@ -93,11 +94,9 @@ navigator.mediaDevices.getUserMedia({
             text += ` | pinky: ${angles.pinky.toFixed(0)}°`;
             text += ` \npalmDist: ${avgTipDistance.toFixed(0)}°`;
             text += ` | thumbIndex: ${thumbIndexAngle.toFixed(0)}°`;
-        }
-        if (smoothOrientation) {
             text += `\nRoll: ${smoothOrientation.roll.toFixed(0)}°, Pitch: ${smoothOrientation.pitch.toFixed(0)}°`;
+            text += `\nHand Pos → x: ${smoothHandPos.x.toFixed(3)}, y: ${smoothHandPos.y.toFixed(3)}, z: ${smoothHandPos.z.toFixed(3)}`;
         }
-        text += `\nHand Pos → x: ${smoothHandPos.x.toFixed(3)}, y: ${smoothHandPos.y.toFixed(3)}, z: ${smoothHandPos.z.toFixed(3)}`;
 
         label.innerText = text;
       } else {

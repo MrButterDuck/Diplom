@@ -3,44 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <title>Hand Tracking</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-    video, canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-    }
-        #gesture-label {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 8px 12px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      font-family: sans-serif;
-      font-size: 20px;
-      z-index: 10;
-      border-radius: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="./src/style/style.css">
 </head>
 <body>
-  <div id="gesture-label">Gesture: none</div>
+  <div id="welcome-screen">
+    <div class="welcome-content">
+      <img id="welcome-logo" src="src/assets/vue.svg" alt="Логотип">
+      <div id="welcome-instructions">
+        <!-- Напиши свою инструкцию здесь -->
+        <div class="instruction-container">
+          <p>Инструкция по жестам</p>
+          <p>Чем лучше освещение, тем лучше будут распознаваться жесты</p>
+          <div class="instruction-item">
+            <img src="./src/assets/open.png" alt="Иконка 1" class="instruction-icon" />
+            <p>Открытая рука. Жест ни для чего не предназначен, свободный жест. Для более точного распознавания разведите пальцы в стороны как на картинке.</p>
+          </div>
+          <div class="instruction-item">
+            <img src="./src/assets/fist.png" alt="Иконка 2" class="instruction-icon" />
+            <p>Кулак. Для более точного распознавания, большой палец поверх, как на картинке. Создает, если сцена пуста, и удалает объект. Объект можно загрузить в меню.</p>
+          </div>
+          <div class="instruction-item">
+            <img src="./src/assets/point.png" alt="Иконка 3" class="instruction-icon" />
+            <p>Указка. Все пальцы собраны в кулак, кроме указательного. Используется для перемещения объекта, если тот на кончике пальца.</p>
+          </div>
+          <div class="instruction-item">
+            <img src="./src/assets/vi.png" alt="Иконка 4" class="instruction-icon" />
+            <p>Жест"Ви". Все пальцы собраны в кулак, кроме указательного и среднего. Используется для вращения объекта, если тот между пальцами.</p>
+          </div>
+          <div class="instruction-item">
+            <img src="./src/assets/grab.png" alt="Иконка 4" class="instruction-icon" />
+            <p>Захват. Все пальцы собраны в кулак, кроме указательного и большого.  Используется в альтеративной схеме управления(включается в настройках). Захватывает объект между большим и указательным пальцами.</p>
+          </div>
+        </div>
+      <button id="start-button">Начать</button>
+    </div>
+  </div>
+  </div>
+  <div id="top-info">
+    <div id="gesture-label">Gesture: none</div>
+    <div id="fps-label">FPS: 0</div>
+  </div>
   <video autoplay muted playsinline></video>
   <canvas></canvas>
-
+  <!-- Bottom Drawer Menu -->
+<div id="bottom-menu" class="collapsed">
+  <div id="menu-handle">▲</div>
+  <div id="menu-inner">
+    <div id="menu-tabs">
+      <button class="tab-button active" data-tab="settings">Настройки</button>
+      <button class="tab-button" data-tab="library">Библиотека</button>
+    </div>
+    <div id="tab-content">
+      <div class="tab-panel" id="settings-panel">
+        <ul class="settings-list">
+          <li>
+            <label>
+              <input type="checkbox" id="toggle-feature">
+              Включить алтерантивное управление(жест grab)
+            </label>
+          </li>
+          <li>
+            <label>
+              <input type="checkbox" id="more-info">
+              Включить дополнительную информацию для отладки
+            </label>
+          </li>
+          <li>
+            <label>
+              <input type="checkbox" id="show-gesture-info" checked>
+              Показать информацию о жестах
+            </label>
+        </li>
+        <li>
+          <button id="clear-library-btn">Очистить библиотеку</button>
+        </li>
+      </ul>
+      </div>
+      <div class="tab-panel hidden" id="library-panel">
+        <div>
+          <input type="text" id="model-url-input" placeholder="Ссылка на модель..." />
+          <div id="menu-tabs">
+            <button id="load-model-btn">Загрузить</button>
+            <button id="clear-selection-btn">Сбросить выбор</button>
+          </div>
+        </div>
+        <div id="model-library-list" class="model-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
   <script type="module" src="./src/js/hand_landmarks.js"></script>
+  <script type="module" src="./src/js/menu.js"></script>
+
 </body>
 </html>

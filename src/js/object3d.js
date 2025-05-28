@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+
 import {
   getSmoothedGesture,
   getSmoothedHandPosition,
@@ -6,16 +7,22 @@ import {
   getSmoothedOrientation
 } from './buffers.js';
 
+import { settings, updateFPS } from "./settings.js"
+
+import { Models, loadSavedModels } from "./3DobjectLoader.js"
+
 let scene, camera, renderer;
 let cube = null;
 
 let isGrabbing = false;
 let canGrab = false;
 
-const grabThreshold = 0.03; // Допустимая дистанция между кубом и пальцами для захвата
+let wasFist = false;
 
-// === Инициализация 3D сцены ===
+const grabThreshold = 0.03;
+
 export function init3D(canvas) {
+  loadSavedModels()
   renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -32,46 +39,67 @@ export function init3D(canvas) {
   animate();
 }
 
-// === Главный цикл отрисовки ===
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  updateFPS()
 }
 
-// === Обновление сцены в зависимости от жестов и позиции руки ===
 export function update3DState() {
   const gesture = getSmoothedGesture();
   const pinchPos = getSmoothedFingerTip();
 
-  // Создание куба при указательном жесте
-  if (gesture === 'point' && !cube && pinchPos) {
-    spawnCubeAtFinger(pinchPos);
+  // === ✅ Создание куба при жесте "fist"
+  if (gesture === 'fist' && pinchPos) {
+    if (!wasFist) {
+      if (!cube) {
+        spawnObjectAtFinger(pinchPos);
+      } else {
+        scene.remove(cube);
+        cube.geometry?.dispose?.();
+        cube.material?.dispose?.();
+        cube = null;
+      }
+      wasFist = true;
+    }
     return;
+  } else {
+    wasFist = false; // сброс флага, когда кулак отпущен
   }
 
   if (!cube) return;
 
-  // Обработка захвата куба
-  if (gesture === 'grab' && pinchPos) {
-    const pinchVec = screenToWorld(pinchPos);
+  if (settings.isAltControl) {
+    //Стандартный режим
+    if (gesture === 'grab' && pinchPos) {
+      const pinchVec = screenToWorld(pinchPos);
+      const distToCube = cube.position.distanceTo(pinchVec);
 
-    const distToCube = cube.position.distanceTo(pinchVec);
+      if (!isGrabbing && distToCube < grabThreshold) {
+        canGrab = true;
+      }
 
-    if (!isGrabbing && distToCube < grabThreshold) {
-      canGrab = true;
-    }
-
-    if (canGrab) {
-      isGrabbing = true;
-      moveCubeTo(pinchVec);
-      rotateCubeWithHand();
+      if (canGrab) {
+        isGrabbing = true;
+        moveCubeTo(pinchVec);
+        rotateCubeWithHand(); // ориентация
+      }
+    } else {
+      resetGrabState();
     }
   } else {
-    resetGrabState();
+    // Альтернативный режим жестов
+    if (gesture === 'point' && pinchPos) {
+      const targetVec = screenToWorld(pinchPos);
+      moveCubeTo(targetVec);
+    }
+
+    if (gesture === 'vi') {
+      rotateCubeWithHand();
+    }
   }
 }
 
-// === Перевод координат с экрана в 3D-пространство ===
 function screenToWorld(screenPos) {
   const screenVec = new THREE.Vector3(
     (screenPos.x / window.innerWidth) * 2 - 1,
@@ -82,45 +110,51 @@ function screenToWorld(screenPos) {
   return screenVec;
 }
 
-// === Создание нового куба ===
-function spawnCubeAtFinger(fingerPos) {
-  const geometry = new THREE.BoxGeometry(0.03, 0.03, 0.03);
-  const material = new THREE.MeshNormalMaterial();
-  cube = new THREE.Mesh(geometry, material);
-
+function spawnObjectAtFinger(fingerPos) {
   const worldPos = screenToWorld(fingerPos);
-  cube.position.copy(worldPos);
 
-  scene.add(cube);
+  if (Models.selectedModelData) {
+    const modelClone = Models.selectedModelData.object.clone();
+    modelClone.position.copy(worldPos);
+    modelClone.scale.set(0.05, 0.05, 0.05); // можно позже сделать настраиваемым
+    scene.add(modelClone);
+    cube = modelClone; // теперь управляем моделью как "кубом"
+  } else {
+    const geometry = new THREE.BoxGeometry(0.03, 0.03, 0.03);
+    const material = new THREE.MeshNormalMaterial();
+    cube = new THREE.Mesh(geometry, material);
+    cube.position.copy(worldPos);
+    scene.add(cube);
+  }
 }
 
-// === Перемещение куба за рукой ===
 function moveCubeTo(targetVec) {
   const hand = getSmoothedHandPosition();
   if (hand) {
-    // Необязательное использование глубины
-    const z = THREE.MathUtils.clamp(5 + hand.z * 5, 4, 6);
-    // targetVec.z = z; // если хочешь двигать по Z
+    const z = THREE.MathUtils.clamp(5 + hand.z * (-60), 4, 5);
+    //targetVec.z = z; // при необходимости
   }
-
   cube.position.lerp(targetVec, 0.6);
 }
 
-// === Вращение куба на основе ориентации руки ===
 function rotateCubeWithHand() {
   const { roll, pitch } = getSmoothedOrientation();
-
-  cube.rotation.x = THREE.MathUtils.degToRad(pitch); // вверх/вниз
-  cube.rotation.z = THREE.MathUtils.degToRad(roll);  // наклон кисти
+  cube.rotation.x = THREE.MathUtils.degToRad(cube.rotation.x + pitch * 3);
+  // cube.rotation.y = THREE.MathUtils.degToRad(yaw * 3);
+  cube.rotation.z = THREE.MathUtils.degToRad(cube.rotation.z + roll * 3);
 }
 
-// === Сброс состояния захвата ===
 function resetGrabState() {
   isGrabbing = false;
   canGrab = false;
 }
 
-// === Обработка изменения размеров окна ===
+// === 🆕 Экспорт переключателя режима управления
+export function toggleControlMode() {
+  isAltControl = !isAltControl;
+  console.log('Control mode switched. isAltControl:', isAltControl);
+}
+
 export function resize3D() {
   if (!camera || !renderer) return;
 
@@ -128,3 +162,6 @@ export function resize3D() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
+
+
