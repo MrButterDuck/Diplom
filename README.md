@@ -32,7 +32,7 @@ npm run dev
 
 ## ссылки на модели для тестов
 
-[Атка](https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb)
+[Утка](https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb)
 
 [Астронавт](https://modelviewer.dev/shared-assets/models/Astronaut.glb) 
 
