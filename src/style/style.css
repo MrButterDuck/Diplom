@@ -3,15 +3,15 @@ html, body {
     padding: 0;
     overflow: hidden;
     overscroll-behavior-y: contain;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
 }
 video, canvas {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -69,7 +69,7 @@ video, canvas {
   flex: 1;
   margin: 0 4px;
   padding: 12px;
-  font-size: 18px;
+  font-size: 30px;
   background: #333;
   border: none;
   color: white;
@@ -97,7 +97,7 @@ button#load-model-btn {
   width: 100%;
   padding: 12px;
   margin: 0 4px;
-  font-size: 18px;
+  font-size: 30px;
   background-color: #28a745;
   color: white;
   border: none;
@@ -108,7 +108,7 @@ button#clear-selection-btn {
   width: 100%;
   padding: 12px;
   margin: 0 4px;
-  font-size: 18px;
+  font-size: 30px;
   background-color: #ce2b2b;
   color: white;
   border: none;
@@ -184,7 +184,7 @@ button#clear-selection-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 30px;
   color: red;
 }
 
@@ -211,14 +211,14 @@ button#clear-selection-btn {
 } */
 
 #welcome-logo {
-    max-width: 200px;
-    margin-bottom: 24px;
+    max-width: 100px;
+    margin-bottom: 12px;
 }
 
 #welcome-instructions {
     font-size: 18px;
-    max-width: 600px;
-    margin-bottom: 24px;
+    max-width: 100%;
+    margin: 5%;
 }
 
 #start-button {
@@ -250,7 +250,7 @@ button#clear-selection-btn {
   background: #222;
   padding: 12px 16px;
   border-radius: 8px;
-  font-size: 18px;
+  font-size: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -273,7 +273,7 @@ button#clear-selection-btn {
 
 #clear-library-btn {
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 30px;
   background-color: #ce2b2b;
   color: white;
   border: none;
@@ -328,8 +328,8 @@ button#clear-selection-btn {
 }
 
 .instruction-icon {
-  width: 150;
-  height: 150;
+  width: 150px;
+  height: 150px;
 }
 
 .instruction-container p {

@@ -1,5 +1,38 @@
-# Vue 3 + Vite
+# HandAr
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Hand AR Web version, developed for DVFU IMCT
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Установка и запуск
+
+1. Клонируйте репозиторий:
+
+```bash
+git clone 
+cd HandAr
+```
+
+2. Установите зависимости:
+
+```bash
+npm install
+```
+
+3. Запустите проект:
+
+```bash
+npm run dev
+```
+
+4. В консоли отобразится url, перейдите по нему с мобильного телефона
+
+5. Дальнейшие инструкции в приложении
+
+⚠ Не рекоммендуется захоходить с версии браузера для ПК, тк адаптировано только под мобильные устройства
+
+
+## ссылки на модели для тестов
+
+[Атка](https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb)
+
+[Астронавт](https://modelviewer.dev/shared-assets/models/Astronaut.glb) 
+
